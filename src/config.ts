@@ -1,4 +1,4 @@
-import {Record, String, Number, Static, Union, Literal} from "runtypes";
+import {Record, String, Number, Static, Union, Literal, Boolean, Array} from "runtypes";
 import {config} from 'dotenv';
 import {join} from 'path';
 
@@ -11,10 +11,11 @@ const AppConfig = Record({
     DISCORD_BOT_TOKEN: String,
     IMGFLIP_USERNAME: String,
     IMGFLIP_PASSWORD: String,
-    DEBUG: Union(Literal(1), Literal(0))
+    DEBUG: Boolean,
+    DEBUG_CHANNELS: Array(String)
 });
 
-export type AppConfig = Static<typeof AppConfig>
+export type AppConfig = ReturnType<typeof getConfig>
 
 export const getConfig = () => {
     config({path: join(process.cwd(), `.${process.env.NODE_ENV}.env`)});
@@ -26,7 +27,8 @@ export const getConfig = () => {
         DISCORD_BOT_TOKEN,
         IMGFLIP_USERNAME,
         IMGFLIP_PASSWORD,
-        DEBUG
+        DEBUG,
+        DEBUG_CHANNELS
     } = process.env;
 
 
@@ -37,7 +39,8 @@ export const getConfig = () => {
         DISCORD_BOT_TOKEN,
         IMGFLIP_USERNAME,
         IMGFLIP_PASSWORD,
-        DEBUG
+        DEBUG: DEBUG === "1",
+        DEBUG_CHANNELS: typeof DEBUG_CHANNELS === "string" ? DEBUG_CHANNELS.split(",") : undefined
     });
 };
 

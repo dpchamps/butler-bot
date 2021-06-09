@@ -34,6 +34,8 @@ const maybeDoCommand = (message: Message, config: AppConfig) => {
 
 export const listenService = (client: Client, config: AppConfig) => {
     client.on('message', (message) => {
+        if(config.DEBUG && !config.DEBUG_CHANNELS.includes(message.channel.id)) return;
+
        maybeDoCommand(message, config);
     });
 };
