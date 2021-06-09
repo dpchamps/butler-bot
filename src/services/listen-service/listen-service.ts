@@ -5,26 +5,24 @@ import {echo} from "./echo";
 import {meme} from "./meme";
 import {AppConfig} from "../../config";
 
-const maybeDoCommand = (message: Message, config: AppConfig) => {
-    console.log(message.channel.id)
-
+const maybeDoCommand = async (message: Message, config: AppConfig) => {
     const command = parseCommand(message.content);
 
     if(!command.isValid) return;
 
     switch (command.type) {
         case "echo": {
-            echo(message, command);
+            await echo(message, command);
             break;
         }
 
         case 'invalid': {
-            message.channel.send(`I'm terribly sorry, but I don't know how to "${command.invalidCommand}".`);
+            await message.channel.send(`I'm terribly sorry, but I don't know how to "${command.invalidCommand}".`);
             break;
         }
 
         case 'meme': {
-            meme(message, command, config);
+            await meme(message, command, config);
             break;
         }
 
@@ -33,9 +31,13 @@ const maybeDoCommand = (message: Message, config: AppConfig) => {
 };
 
 export const listenService = (client: Client, config: AppConfig) => {
-    client.on('message', (message) => {
+    client.on('message', async (message) => {
         if(config.DEBUG && !config.DEBUG_CHANNELS.includes(message.channel.id)) return;
 
-       maybeDoCommand(message, config);
+        try{
+            await maybeDoCommand(message, config);
+        }catch(e){
+            console.error(`Something bad happened, and it went unnoticed...`, e);
+        }
     });
 };

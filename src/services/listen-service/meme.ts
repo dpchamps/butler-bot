@@ -3,53 +3,61 @@ import {Message} from "discord.js";
 import {BotCommand} from "../../bot/parseCommand";
 import {AppConfig} from "../../config";
 import assert from "assert";
-import {Record, Union, String, Boolean, Literal} from "runtypes";
+import * as RT from "runtypes";
 import {speak} from "../../bot/speak";
 import FormData from 'form-data';
+import {Option, orDefault} from "../../util";
 
-const ImgFlipResponse = Union(
-    Record({
-            success: Literal(true),
-            data: Record({
-                url: String,
-                page_url: String
+const ImgFlipResponse = RT.Union(
+    RT.Record({
+            success: RT.Literal(true),
+            data: RT.Record({
+                url: RT.String,
+                page_url: RT.String
             })
     }),
-    Record({
-            success: Literal(false),
-            error_message: String,
+    RT.Record({
+            success: RT.Literal(false),
+            error_message: RT.String,
     })
 );
 
-export const meme = (message: Message, {content}: BotCommand, config: AppConfig) => {
-    const [templateId, topText, bottomText] = content;
-    assert(templateId, "Expected templateid to exist for meme but found nothing!")
-    console.info({templateId, topText, bottomText});
-    console.info("Making request....");
-    const form = new FormData();
-    form.append('template_id', templateId);
-    form.append("username", config.IMGFLIP_USERNAME);
-    form.append("password", config.IMGFLIP_PASSWORD);
-    form.append("text0", topText||"");
-    form.append("text1", bottomText||"");
-    console.log(form);
+type ImgFlipResponse = RT.Static<typeof ImgFlipResponse>;
 
-    fetch("https://api.imgflip.com/caption_image", {
+
+const memeGenerateFormData = (options :Record<string, Option<string>>) => {
+    const form = new FormData();
+
+    Object.entries(options).forEach(([k, v]) => form.append(k, orDefault(v, "")));
+
+    return form;
+};
+
+const getMessageFromGenerateResponse = (response: ImgFlipResponse) => response.success ? {
+    files: [response.data.url],
+    content: speak("I've made your meme straight away!")
+} : speak(`So Sorry, I couldn't make that meme. The reason is quite technical, you see`);
+
+const makeMeme = (body: FormData) => {
+    return fetch("https://api.imgflip.com/caption_image", {
         method: "POST",
-        body: form
+        body
     })
         .then(res => res.json())
         .then(ImgFlipResponse.check)
-        .then((response) => {
-            console.info("Alright! got it.", {response});
-            if(response.success){
-                message.channel.send({
-                    files: [response.data.url],
-                    content: speak("I've made your meme straight away!")
-                })
-            } else {
-                message.channel.send(speak(`So Sorry, I couldn't make that meme: ${response.error_message}`));
-            }
-        })
+        .then(getMessageFromGenerateResponse)
+};
 
+export const meme = async (message: Message, {content}: BotCommand, config: AppConfig) => {
+    const [templateId, topText, bottomText] = content;
+    assert(templateId, "Expected templateid to exist for meme but found nothing!")
+
+
+    return makeMeme(memeGenerateFormData({
+        template_id: templateId,
+        username: config.IMGFLIP_USERNAME,
+        password: config.IMGFLIP_PASSWORD,
+        text0: topText,
+        text1: bottomText
+    })).then(x => message.channel.send(x));
 };
