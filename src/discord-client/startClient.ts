@@ -18,7 +18,7 @@ export const startClient = async (config: AppConfig) => {
     await client.login(config.DISCORD_BOT_TOKEN);
     console.info("All set, the bot's up!");
     await clientReady(client);
-    await composeClient(client);
+    await composeClient(client, config);
 
     return () => client.destroy();
 };

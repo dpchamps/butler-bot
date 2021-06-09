@@ -8,7 +8,9 @@ const AppConfig = Record({
     DISCORD_APPLICATION_ID: String,
     DISCORD_CLIENT_ID: String,
     DISCORD_CLIENT_SECRET: String,
-    DISCORD_BOT_TOKEN: String
+    DISCORD_BOT_TOKEN: String,
+    IMGFLIP_USERNAME: String,
+    IMGFLIP_PASSWORD: String
 });
 
 export type AppConfig = Static<typeof AppConfig>
@@ -20,7 +22,9 @@ export const getConfig = () => {
         DISCORD_APPLICATION_ID,
         DISCORD_CLIENT_ID,
         DISCORD_CLIENT_SECRET,
-        DISCORD_BOT_TOKEN
+        DISCORD_BOT_TOKEN,
+        IMGFLIP_USERNAME,
+        IMGFLIP_PASSWORD
     } = process.env;
 
 
@@ -28,7 +32,9 @@ export const getConfig = () => {
         DISCORD_APPLICATION_ID,
         DISCORD_CLIENT_ID,
         DISCORD_CLIENT_SECRET,
-        DISCORD_BOT_TOKEN
+        DISCORD_BOT_TOKEN,
+        IMGFLIP_USERNAME,
+        IMGFLIP_PASSWORD,
     });
 };
 

@@ -1,7 +1,7 @@
 import {Client} from "discord.js";
+import {listenService} from "../services/listen-service/listen-service";
+import {AppConfig} from "../config";
 
-import {echoService} from "./services/echo";
-
-export const composeClient = async (client: Client) => {
-    echoService(client);
+export const composeClient = async (client: Client, config: AppConfig) => {
+    listenService(client, config);
 };
