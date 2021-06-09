@@ -5,6 +5,8 @@ import {echo} from "./echo";
 import {meme} from "./meme";
 import {AppConfig} from "../../config";
 
+
+
 const maybeDoCommand = async (message: Message, config: AppConfig) => {
     const command = parseCommand(message.content);
 
