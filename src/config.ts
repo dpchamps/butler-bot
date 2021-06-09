@@ -1,4 +1,4 @@
-import {Record, String, Number, Static} from "runtypes";
+import {Record, String, Number, Static, Union, Literal} from "runtypes";
 import {config} from 'dotenv';
 import {join} from 'path';
 
@@ -10,7 +10,8 @@ const AppConfig = Record({
     DISCORD_CLIENT_SECRET: String,
     DISCORD_BOT_TOKEN: String,
     IMGFLIP_USERNAME: String,
-    IMGFLIP_PASSWORD: String
+    IMGFLIP_PASSWORD: String,
+    DEBUG: Union(Literal(1), Literal(0))
 });
 
 export type AppConfig = Static<typeof AppConfig>
@@ -24,7 +25,8 @@ export const getConfig = () => {
         DISCORD_CLIENT_SECRET,
         DISCORD_BOT_TOKEN,
         IMGFLIP_USERNAME,
-        IMGFLIP_PASSWORD
+        IMGFLIP_PASSWORD,
+        DEBUG
     } = process.env;
 
 
@@ -35,6 +37,7 @@ export const getConfig = () => {
         DISCORD_BOT_TOKEN,
         IMGFLIP_USERNAME,
         IMGFLIP_PASSWORD,
+        DEBUG
     });
 };
 

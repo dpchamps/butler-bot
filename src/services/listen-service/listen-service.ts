@@ -6,6 +6,8 @@ import {meme} from "./meme";
 import {AppConfig} from "../../config";
 
 const maybeDoCommand = (message: Message, config: AppConfig) => {
+    console.log(message.channel.id)
+
     const command = parseCommand(message.content);
 
     if(!command.isValid) return;
