@@ -4,6 +4,7 @@ import {unreachable} from "../../util";
 import {echo} from "./echo";
 import {meme} from "./meme";
 import {AppConfig} from "../../config";
+import {mock} from "./mock";
 
 
 
@@ -25,6 +26,11 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
 
         case 'meme': {
             await meme(message, command, config);
+            break;
+        }
+
+        case 'mock': {
+            await mock(message);
             break;
         }
 

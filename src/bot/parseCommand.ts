@@ -1,8 +1,13 @@
 import {Literal, Union, Static, check} from 'runtypes';
 import {Option} from "../util";
 
-const BotType = Union(Literal("echo"), Literal("invalid"), Literal("meme"));
-type BotType = Static<typeof BotType>;
+const BotCommandType = Union(
+    Literal("echo"),
+    Literal("invalid"),
+    Literal("meme"),
+    Literal("mock")
+);
+type BotType = Static<typeof BotCommandType>;
 
 export type BotCommand = {
     type: BotType;
@@ -13,7 +18,7 @@ export type BotCommand = {
 
 const validateType = (type: string): BotType => {
     try {
-        return BotType.check(type)
+        return BotCommandType.check(type)
     }catch{
         return "invalid"
     }
