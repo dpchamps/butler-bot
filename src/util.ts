@@ -8,3 +8,9 @@ export const multiline = (...args: Array<{toString(): string}>) => args.join('\n
 export const unreachable = () : never => {throw new Error("unreachable!")};
 export const exists = <T>(x: Option<T>): x is T => typeof x !== "undefined";
 export const orDefault = <T>(x: Option<T>, fallback: T) => typeof x === "undefined" ? fallback : x;
+export const mockingCase = (sentence: string) => sentence.split("").reduce(
+    (str, char, idx) => {
+        return `${str}${idx % 2 === 0 ? char : char.toUpperCase()}`
+    },
+    ""
+);
