@@ -6,6 +6,7 @@ export type Option<T> = T | undefined;
 export const getRandom = <T>(arr: Array<T>) => arr[Math.floor(Math.random()*arr.length)];
 export const multiline = (...args: Array<{toString(): string}>) => args.join('\n');
 export const unreachable = () : never => {throw new Error("unreachable!")};
+export const unimplemented = () => new Error("unimplemented!");
 export const exists = <T>(x: Option<T>): x is T => typeof x !== "undefined";
 export const orDefault = <T>(x: Option<T>, fallback: T) => typeof x === "undefined" ? fallback : x;
 export const mockingCase = (sentence: string) => sentence.split("").reduce(
@@ -14,3 +15,16 @@ export const mockingCase = (sentence: string) => sentence.split("").reduce(
     },
     ""
 );
+
+
+export const parseToNumber = (numberLikeString: string) => {
+    const maybeNumber = Number(numberLikeString);
+
+    if(Number.isNaN(maybeNumber)){
+        throw new Error(`Expected a number-like-string but got: ${numberLikeString}`)
+    }
+
+    return maybeNumber;
+};
+
+export const tail = <T>(xs: T[]): T|undefined => xs[xs.length-1];

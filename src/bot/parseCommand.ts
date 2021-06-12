@@ -5,7 +5,8 @@ const BotCommandType = Union(
     Literal("echo"),
     Literal("invalid"),
     Literal("meme"),
-    Literal("mock")
+    Literal("mock"),
+    Literal("qrd")
 );
 type BotType = Static<typeof BotCommandType>;
 

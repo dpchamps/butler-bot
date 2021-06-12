@@ -5,6 +5,7 @@ import {echo} from "./echo";
 import {meme} from "./meme";
 import {AppConfig} from "../../config";
 import {mock} from "./mock";
+import {qrd} from "./qrd";
 
 
 
@@ -31,6 +32,11 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
 
         case 'mock': {
             await mock(message);
+            break;
+        }
+
+        case 'qrd': {
+            await qrd(message, command)
             break;
         }
 
