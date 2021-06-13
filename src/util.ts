@@ -1,3 +1,5 @@
+import {join, resolve} from "path";
+
 export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export type Awaited<T> = T extends Promise<infer U> ? U : T;
 export type Option<T> = T | undefined;
@@ -31,3 +33,17 @@ export const parseToNumber = (numberLikeString: string) => {
 };
 
 export const tail = <T>(xs: T[]): T | undefined => xs[xs.length - 1];
+
+export const STATIC_DIR = resolve(join(
+    __dirname,
+    "..",
+    "static",
+));
+
+export const range = (start = 0, end = Infinity) => Array(end-start).fill(0).map((_, idx) => idx+start);
+
+
+export const tap = <T>(fn: (x: T) => void) => (x: T) => {
+  fn(x);
+  return x
+};

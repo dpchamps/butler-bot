@@ -7,6 +7,8 @@ import { AppConfig } from "../../config";
 import { mock } from "./mock";
 import { qrd } from "./qrd";
 import { laugh } from "./laugh";
+import {search} from "./search";
+import {sermon} from "./sermon";
 
 const maybeDoCommand = async (message: Message, config: AppConfig) => {
   const command = parseCommand(message.content);
@@ -46,6 +48,16 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
       break;
     }
 
+    case "bing":
+    case "google": {
+      await search(message, command.type, command);
+      break;
+    }
+
+    case "sermon":{
+      await sermon(message);
+      break
+    }
     default:
       unreachable(command.type);
   }

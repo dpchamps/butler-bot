@@ -1,22 +1,15 @@
 import { Message } from "discord.js";
 import { deepApology, speak } from "../../bot/speak";
-import { getRandom, mockingCase } from "../../util";
+import {getRandom, mockingCase, STATIC_DIR} from "../../util";
 import { promises as fs } from "fs";
-import { join, resolve } from "path";
+import { join } from "path";
 
-const STATIC_DIR = join(
-  __dirname,
-  "..",
-  "..",
-  "..",
-  "static",
-  "girls-laughing"
-);
+
 const getImageOfGirlsLaughing = () =>
   fs
-    .readdir(STATIC_DIR)
+    .readdir(join(STATIC_DIR, "girls-laughing"))
     .then(getRandom)
-    .then((x) => join(STATIC_DIR, x));
+    .then((x) => join(STATIC_DIR, "girls-laughing", x));
 
 export const laugh = async (message: Message) => {
   if (!message.reference || !message.reference.messageID) {

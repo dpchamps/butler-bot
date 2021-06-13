@@ -7,7 +7,10 @@ const BotCommandType = Union(
   Literal("meme"),
   Literal("mock"),
   Literal("qrd"),
-  Literal("laugh")
+  Literal("laugh"),
+  Literal("google"),
+  Literal("bing"),
+  Literal("sermon")
 );
 type BotType = Static<typeof BotCommandType>;
 
