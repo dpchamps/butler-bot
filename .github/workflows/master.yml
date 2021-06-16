@@ -32,7 +32,7 @@ jobs:
 
       - name: write-prod-env
         shell: bash
-        with:
+        env:
           PRODUCTION_ENV: ${{secrets.ENV}}
         run: echo $PRODUCTION_ENV > .production.env
 #      - name: Hello world action step
