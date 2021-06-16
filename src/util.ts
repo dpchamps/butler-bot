@@ -1,4 +1,5 @@
 import {join, resolve} from "path";
+import FormData from "form-data";
 
 export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -53,4 +54,20 @@ export const range = (start = 0, end = Infinity) => Array(end-start).fill(0).map
 export const tap = <T>(fn: (x: T) => void) => (x: T) => {
   fn(x);
   return x
+};
+
+export const isRecordLike = (x: unknown): x is Record<string, unknown> => Object(x) === x;
+
+export const createFormData = (input: unknown, formData = new FormData(), propName = '') => {
+  if(Array.isArray(input)){
+    input.forEach((el, idx) => createFormData(el, formData, `${propName}[${idx}]`))
+  } else if (isRecordLike(input)) {
+    Object.entries(input).forEach(
+        ([prop, val]) => createFormData(val, formData, propName ? `${propName}[${prop}]` : prop)
+    )
+  } else {
+    formData.append(propName, input)
+  }
+
+  return formData;
 };
