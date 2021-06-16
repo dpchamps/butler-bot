@@ -33,8 +33,7 @@ jobs:
       - name: write-prod-env
         with:
           PRODUCTION_ENV: ${{secrets.ENV}}
-        run: |
-          echo $PRODUCTION_ENV > .production.env
+        run: echo $PRODUCTION_ENV > .production.env
 
 #      - name: Hello world action step
 #             uses: actions/hello-world-docker-action@v1
