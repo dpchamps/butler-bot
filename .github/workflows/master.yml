@@ -6,7 +6,7 @@ name: master
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches: [master]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -31,10 +31,10 @@ jobs:
         run: npm run test
 
       - name: write-prod-env
+        shell: bash
         with:
           PRODUCTION_ENV: ${{secrets.ENV}}
         run: echo $PRODUCTION_ENV > .production.env
-
 #      - name: Hello world action step
 #             uses: actions/hello-world-docker-action@v1
 #             with:
