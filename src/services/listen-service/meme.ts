@@ -108,7 +108,7 @@ export const meme = (
   { content }: BotCommand,
   config: AppConfig
 ) => {
-  const [memeName, topText, bottomText] = content;
+  const [memeName, topText, bottomText, thirdText, fourthText, fifthText] = content;
 
   return searchForMeme(memeName)
     .then((id) => {
@@ -121,8 +121,23 @@ export const meme = (
           template_id: templateId,
           username: config.IMGFLIP_USERNAME,
           password: config.IMGFLIP_PASSWORD,
-          text0: topText,
-          text1: bottomText,
+          boxes: [
+            {
+              "text": topText
+            },
+            {
+              "text": bottomText
+            },
+            {
+              "text": thirdText
+            },
+            {
+              "text": fourthText
+            },
+            {
+              "text": fifthText
+            }
+          ]
         })
       )
     )
