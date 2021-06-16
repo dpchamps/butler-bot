@@ -47,13 +47,13 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Build and push
-          id: docker_build
-          uses: docker/build-push-action@v2
-          with:
-            context: ./
-            file: ./docker/bot/Dockerfile
-            push: true
-            tags: ${{ secrets.DOCKERHUB_USERNAME }}/butler-bot:latest
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./docker/bot/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/butler-bot:latest
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
