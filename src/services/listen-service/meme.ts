@@ -6,7 +6,7 @@ import assert from "assert";
 import * as RT from "runtypes";
 import { deepApology, speak } from "../../bot/speak";
 import FormData from "form-data";
-import { Option, orDefault } from "../../util";
+import {createFormData, Option, orDefault} from "../../util";
 
 const ImgFlipGetResponse = RT.Record({
   success: RT.Literal(true),
@@ -36,13 +36,6 @@ const ImgFlipGenerateResponse = RT.Union(
 
 type ImgFlipResponse = RT.Static<typeof ImgFlipGenerateResponse>;
 
-const memeGenerateFormData = (options: Record<string, Option<string>>) => {
-  const form = new FormData();
-
-  Object.entries(options).forEach(([k, v]) => form.append(k, orDefault(v, "")));
-
-  return form;
-};
 
 const getMessageFromGenerateResponse = (response: ImgFlipResponse) =>
   response.success
@@ -51,7 +44,7 @@ const getMessageFromGenerateResponse = (response: ImgFlipResponse) =>
         content: speak("I've made your meme straight away!"),
       }
     : speak(
-        `I couldn't make that meme. The reason is quite technical, you see`
+        `I couldn't make that meme. The reason is quite technical, you see ${JSON.stringify(response)}`
       );
 
 interface MemeCache {
@@ -88,15 +81,14 @@ const searchForMeme = async (memeName: Option<string>) => {
   return memes.find(({ id, name }) => name.match(regex))?.id;
 };
 
-const makeMeme = (body: FormData) => {
-  return fetch("https://api.imgflip.com/caption_image", {
+const makeMeme = (body: FormData) =>
+    fetch("https://api.imgflip.com/caption_image", {
     method: "POST",
     body,
   })
     .then((res) => res.json())
     .then(ImgFlipGenerateResponse.check)
     .then(getMessageFromGenerateResponse);
-};
 
 const outputError = (message: Message) => (e: Error) => {
   console.error(`[meme]`, e);
@@ -108,7 +100,7 @@ export const meme = (
   { content }: BotCommand,
   config: AppConfig
 ) => {
-  const [memeName, topText, bottomText, thirdText, fourthText, fifthText] = content;
+  const [memeName, ...memeContent] = content;
 
   return searchForMeme(memeName)
     .then((id) => {
@@ -117,27 +109,11 @@ export const meme = (
     })
     .then((templateId) =>
       makeMeme(
-        memeGenerateFormData({
+        createFormData({
           template_id: templateId,
           username: config.IMGFLIP_USERNAME,
           password: config.IMGFLIP_PASSWORD,
-          boxes: [
-            {
-              "text": topText
-            },
-            {
-              "text": bottomText
-            },
-            {
-              "text": thirdText
-            },
-            {
-              "text": fourthText
-            },
-            {
-              "text": fifthText
-            }
-          ]
+          boxes: memeContent.map(x => ({text: x.toUpperCase()}))
         })
       )
     )
