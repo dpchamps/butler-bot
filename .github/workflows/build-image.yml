@@ -1,0 +1,9 @@
+name: 'BuildBotImage'
+description: 'Build Bot Image'
+
+outputs:
+  time: # id of output
+    description: 'image built'
+runs:
+  using: 'docker'
+  image: './docker/bot/Dockerfile'
