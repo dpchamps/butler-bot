@@ -40,8 +40,6 @@ jobs:
           PRODUCTION_ENV: ${{secrets.ENV}}
         run: |
           echo "$PRODUCTION_ENV" >> .production.env
-          cat .production.env
-          pwd
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
