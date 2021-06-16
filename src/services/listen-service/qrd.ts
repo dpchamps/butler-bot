@@ -4,19 +4,12 @@ import {
   Option,
   orDefault,
   parseToNumber,
-  tail,
-  unimplemented,
 } from "../../util";
 import { deepApology, speak } from "../../bot/speak";
-import subHours from "date-fns/subHours";
 import compareAsc from "date-fns/compareAsc";
-import compareDsc from "date-fns/compareDesc";
 
 const { SummarizerManager } = require("node-summarizer");
 const USAGE_MESSAGE = `I expected: \`butler: qrd. <number of messages>\``;
-
-const searchError = () =>
-  new Error(`I had a hard time finding messages in the channel.`);
 
 const validateValue = (value: number) => {
   if (value < 10 || value > 200) {
@@ -30,69 +23,47 @@ const validateValue = (value: number) => {
 
 const parseQrdSubCommand = (subcommand: Option<string>) => {
   try {
-    return validateValue(parseToNumber(orDefault(subcommand, "100")));
+    return validateValue(parseToNumber(orDefault(subcommand, "200")));
   } catch (e) {
     throw new Error(`${USAGE_MESSAGE}\n${e.message}`);
   }
 };
 
-const binarySearchMessages = (needle: Date, messages: Message[]): Message[] => {
-  const pointer = Math.ceil(messages.length / 2);
-  const middle = messages[pointer];
-
-  if (!middle) {
-    throw searchError();
-  }
-
-  if (compareAsc(needle, new Date(middle.createdTimestamp)) === 1) {
-    return binarySearchMessages(needle, messages.slice(pointer));
-  }
-
-  return messages;
-};
-
-const fetchMessagesUntilSatisfied = async (
-  needle: Date,
-  start: Message,
-  messages?: Collection<string, Message>
-): Promise<Message[]> => {
-  const lastMessages = (
-    await start.channel.messages.fetch({
-      limit: 10,
-      before: start.id,
-    })
-  )
-    .sort((a, b) =>
-      compareDsc(new Date(a.createdTimestamp), new Date(b.createdTimestamp))
-    )
-    .filter((msg) => !msg.author.bot);
-  const lastMessage = lastMessages.last();
-  const nextMessages = messages ? messages.concat(lastMessages) : lastMessages;
-  const lastMessageTimestamp = new Date(start.createdTimestamp);
-
-  if (!lastMessage) {
-    throw searchError();
-  }
-
-  if (compareAsc(needle, lastMessageTimestamp) === -1) {
-    return fetchMessagesUntilSatisfied(needle, lastMessage, nextMessages);
-  }
-
-  return binarySearchMessages(needle, [...nextMessages.values()]);
-};
-
-const summarizeMessage = async (messages: Message[]) => {
-  const corpus = messages
-    .map((msg) => `${msg.content.split("\n").filter(Boolean).join(".")}.`)
+const normalizeMessagesForCorpus = (messages: Message[]) => messages.flatMap(
+    ({content}) => content.split("\n").filter(Boolean).map(x => `${x}`)
+)
+    .map(x => x.trim())
+    .map(x => !x.match(/([?.!])$/) ? `${x}.` : x )
     .join("\n");
 
-  const summarizer = new SummarizerManager(corpus, 5);
+const buildAuthorFrequencyHistogram = (messages: Message[]) => messages.reduce(
+    (histogram, message) => ({
+      ...histogram,
+      [message.author.username] : histogram[message.author.username] ?  histogram[message.author.username] + 1 : 1
+    }),
+    {} as Record<string, number>
+);
+
+const topContributors = (n: number, histogram: Record<string, number>) => Object.entries(histogram).sort(
+    (a, b) => b[1] - a[1]
+).slice(0, n);
+
+const lineLength = (ll: number) => (str: string) => str.length > ll ? `${str.substring(0, ll)} ...` : str;
+
+const summarizeMessage = async (messages: Message[]) => {
+  const corpus = normalizeMessagesForCorpus(messages);
+  const topAuthors = topContributors(4, buildAuthorFrequencyHistogram(messages));
+
+  const summarizer = new SummarizerManager(corpus, 8);
 
   const trSummary = await summarizer
     .getSummaryByRank()
     .then(({ summary }: any) => summary);
 
-  return (trSummary as string).split("\n").filter(Boolean).join("\n");
+
+  const normalizedSummary: Array<string> = [...new Set(trSummary.split(/[?.!]/gi)) as unknown as string[]].filter(Boolean);
+
+  return `Top posters: \n${topAuthors.map(([author, posts]) => `\`${author}\`, with ${posts} posts`).join("\n")}\nSummary: \n${normalizedSummary.map((x:string) => `\t - ${lineLength(300)(x)}`).join("\n")}`
 };
 
 const fetchMessages = async (
@@ -102,10 +73,13 @@ const fetchMessages = async (
   if (!message) return [];
   const nextFetch = Math.min(remaining, 100);
   const nextRemaining = remaining - nextFetch;
-  console.log({ nextFetch });
+  const channel = await message.client.channels.fetch("819655482956447807");
+  if(!channel.isText()) {
+    throw new Error()
+  }
 
   const messages = (
-    await message.channel.messages.fetch({
+    await channel.messages.fetch({
       limit: nextFetch,
       before: message.id,
     })
@@ -116,7 +90,7 @@ const fetchMessages = async (
     return [...messages.values(), ...next];
   }
 
-  return [...messages.values()];
+  return [...messages.values()].sort((a, b) => compareAsc(a.createdTimestamp, b.createdTimestamp));
 };
 
 export const qrd = async (message: Message, { content }: BotCommand) => {
