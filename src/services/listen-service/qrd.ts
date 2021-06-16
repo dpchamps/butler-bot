@@ -73,13 +73,12 @@ const fetchMessages = async (
   if (!message) return [];
   const nextFetch = Math.min(remaining, 100);
   const nextRemaining = remaining - nextFetch;
-  const channel = await message.client.channels.fetch("819655482956447807");
-  if(!channel.isText()) {
-    throw new Error()
-  }
+  // if(!channel.isText()) {
+  //   throw new Error()
+  // }
 
   const messages = (
-    await channel.messages.fetch({
+    await message.channel.messages.fetch({
       limit: nextFetch,
       before: message.id,
     })
