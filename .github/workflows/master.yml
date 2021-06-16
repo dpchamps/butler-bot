@@ -39,7 +39,7 @@ jobs:
         env:
           PRODUCTION_ENV: ${{secrets.ENV}}
         run: |
-          echo $PRODUCTION_ENV > .production.env
+          echo "$PRODUCTION_ENV" >> .production.env
           cat .production.env
           pwd
 
