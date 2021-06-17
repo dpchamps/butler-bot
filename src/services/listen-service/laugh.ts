@@ -1,9 +1,8 @@
 import { Message } from "discord.js";
 import { deepApology, speak } from "../../bot/speak";
-import {getRandom, mockingCase, STATIC_DIR} from "../../util";
+import { getRandom, mockingCase, STATIC_DIR } from "../../util";
 import { promises as fs } from "fs";
 import { join } from "path";
-
 
 const getImageOfGirlsLaughing = () =>
   fs

@@ -1,10 +1,6 @@
 import { Collection, Message, Channel } from "discord.js";
 import { BotCommand } from "../../bot/parseCommand";
-import {
-  Option,
-  orDefault,
-  parseToNumber,
-} from "../../util";
+import { Option, orDefault, parseToNumber } from "../../util";
 import { deepApology, speak } from "../../bot/speak";
 import compareAsc from "date-fns/compareAsc";
 
@@ -29,30 +25,43 @@ const parseQrdSubCommand = (subcommand: Option<string>) => {
   }
 };
 
-const normalizeMessagesForCorpus = (messages: Message[]) => messages.flatMap(
-    ({content}) => content.split("\n").filter(Boolean).map(x => `${x}`)
-)
-    .map(x => x.trim())
-    .map(x => !x.match(/([?.!])$/) ? `${x}.` : x )
+const normalizeMessagesForCorpus = (messages: Message[]) =>
+  messages
+    .flatMap(({ content }) =>
+      content
+        .split("\n")
+        .filter(Boolean)
+        .map((x) => `${x}`)
+    )
+    .map((x) => x.trim())
+    .map((x) => (!x.match(/([?.!])$/) ? `${x}.` : x))
     .join("\n");
 
-const buildAuthorFrequencyHistogram = (messages: Message[]) => messages.reduce(
+const buildAuthorFrequencyHistogram = (messages: Message[]) =>
+  messages.reduce(
     (histogram, message) => ({
       ...histogram,
-      [message.author.username] : histogram[message.author.username] ?  histogram[message.author.username] + 1 : 1
+      [message.author.username]: histogram[message.author.username]
+        ? histogram[message.author.username] + 1
+        : 1,
     }),
     {} as Record<string, number>
-);
+  );
 
-const topContributors = (n: number, histogram: Record<string, number>) => Object.entries(histogram).sort(
-    (a, b) => b[1] - a[1]
-).slice(0, n);
+const topContributors = (n: number, histogram: Record<string, number>) =>
+  Object.entries(histogram)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n);
 
-const lineLength = (ll: number) => (str: string) => str.length > ll ? `${str.substring(0, ll)} ...` : str;
+const lineLength = (ll: number) => (str: string) =>
+  str.length > ll ? `${str.substring(0, ll)} ...` : str;
 
 const summarizeMessage = async (messages: Message[]) => {
   const corpus = normalizeMessagesForCorpus(messages);
-  const topAuthors = topContributors(4, buildAuthorFrequencyHistogram(messages));
+  const topAuthors = topContributors(
+    4,
+    buildAuthorFrequencyHistogram(messages)
+  );
 
   const summarizer = new SummarizerManager(corpus, 8);
 
@@ -60,10 +69,15 @@ const summarizeMessage = async (messages: Message[]) => {
     .getSummaryByRank()
     .then(({ summary }: any) => summary);
 
+  const normalizedSummary: Array<string> = [
+    ...(new Set(trSummary.split(/[?.!]/gi)) as unknown as string[]),
+  ].filter(Boolean);
 
-  const normalizedSummary: Array<string> = [...new Set(trSummary.split(/[?.!]/gi)) as unknown as string[]].filter(Boolean);
-
-  return `Top posters: \n${topAuthors.map(([author, posts]) => `\`${author}\`, with ${posts} posts`).join("\n")}\nSummary: \n${normalizedSummary.map((x:string) => `\t - ${lineLength(300)(x)}`).join("\n")}`
+  return `Top posters: \n${topAuthors
+    .map(([author, posts]) => `\`${author}\`, with ${posts} posts`)
+    .join("\n")}\nSummary: \n${normalizedSummary
+    .map((x: string) => `\t - ${lineLength(300)(x)}`)
+    .join("\n")}`;
 };
 
 const fetchMessages = async (
@@ -89,7 +103,9 @@ const fetchMessages = async (
     return [...messages.values(), ...next];
   }
 
-  return [...messages.values()].sort((a, b) => compareAsc(a.createdTimestamp, b.createdTimestamp));
+  return [...messages.values()].sort((a, b) =>
+    compareAsc(a.createdTimestamp, b.createdTimestamp)
+  );
 };
 
 export const qrd = async (message: Message, { content }: BotCommand) => {

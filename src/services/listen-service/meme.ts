@@ -6,7 +6,7 @@ import assert from "assert";
 import * as RT from "runtypes";
 import { deepApology, speak } from "../../bot/speak";
 import FormData from "form-data";
-import {createFormData, Option, orDefault} from "../../util";
+import { createFormData, Option, orDefault } from "../../util";
 
 const ImgFlipGetResponse = RT.Record({
   success: RT.Literal(true),
@@ -36,7 +36,6 @@ const ImgFlipGenerateResponse = RT.Union(
 
 type ImgFlipResponse = RT.Static<typeof ImgFlipGenerateResponse>;
 
-
 const getMessageFromGenerateResponse = (response: ImgFlipResponse) =>
   response.success
     ? {
@@ -44,7 +43,9 @@ const getMessageFromGenerateResponse = (response: ImgFlipResponse) =>
         content: speak("I've made your meme straight away!"),
       }
     : speak(
-        `I couldn't make that meme. The reason is quite technical, you see ${JSON.stringify(response)}`
+        `I couldn't make that meme. The reason is quite technical, you see ${JSON.stringify(
+          response
+        )}`
       );
 
 interface MemeCache {
@@ -82,7 +83,7 @@ const searchForMeme = async (memeName: Option<string>) => {
 };
 
 const makeMeme = (body: FormData) =>
-    fetch("https://api.imgflip.com/caption_image", {
+  fetch("https://api.imgflip.com/caption_image", {
     method: "POST",
     body,
   })
@@ -113,7 +114,7 @@ export const meme = (
           template_id: templateId,
           username: config.IMGFLIP_USERNAME,
           password: config.IMGFLIP_PASSWORD,
-          boxes: memeContent.map(x => ({text: x.toUpperCase()}))
+          boxes: memeContent.map((x) => ({ text: x.toUpperCase() })),
         })
       )
     )

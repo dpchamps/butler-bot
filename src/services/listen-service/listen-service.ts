@@ -7,8 +7,8 @@ import { AppConfig } from "../../config";
 import { mock } from "./mock";
 import { qrd } from "./qrd";
 import { laugh } from "./laugh";
-import {search} from "./search";
-import {sermon} from "./sermon";
+import { search } from "./search";
+import { sermon } from "./sermon";
 
 const maybeDoCommand = async (message: Message, config: AppConfig) => {
   const command = parseCommand(message.content);
@@ -54,9 +54,9 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
       break;
     }
 
-    case "sermon":{
+    case "sermon": {
       await sermon(message);
-      break
+      break;
     }
     default:
       unreachable(command.type);
