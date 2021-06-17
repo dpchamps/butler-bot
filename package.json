@@ -7,9 +7,10 @@
     "test": "echo 😇",
     "db": "docker-compose up",
     "format": "prettier --write ./src",
-    "lint": "",
+    "lint": "prettier --check ./src",
     "dev": "NODE_ENV=development ts-node ./src/main.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     ""
