@@ -1,11 +1,11 @@
 import { join, resolve } from "path";
 import FormData from "form-data";
 
-export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
 export type Awaited<T> = T extends Promise<infer U> ? U : T;
 
 export type Option<T> = T | undefined;
+
+export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export const getRandom = <T>(arr: Array<T>) =>
   arr[Math.floor(Math.random() * arr.length)];
@@ -78,3 +78,11 @@ export const createFormData = (
 
   return formData;
 };
+
+export const timeout = <T>(fn: () => Promise<T>, ms: number) =>
+  Promise.race([
+    fn(),
+    sleep(ms).then(() => {
+      throw new Error(`timeout`);
+    }),
+  ]);
