@@ -32,7 +32,7 @@ const validateType = (type: string): BotType => {
 export const parseCommand = (input: string): BotCommand => {
   const isValid = input.toLowerCase().startsWith("butler:");
   const [type, ...content] = input
-    .replace("butler:", "")
+    .replace(/^butler:/i, "")
     .trim()
     .split(".")
     .map((x) => x.trim());
