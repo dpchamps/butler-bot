@@ -79,9 +79,10 @@ export const createFormData = (
   return formData;
 };
 
-export const timeout = <T>(fn: () => Promise<T>, ms: number) => Promise.race([
+export const timeout = <T>(fn: () => Promise<T>, ms: number) =>
+  Promise.race([
     fn(),
     sleep(ms).then(() => {
-      throw new Error(`timeout`)
-    })
-]);
+      throw new Error(`timeout`);
+    }),
+  ]);
