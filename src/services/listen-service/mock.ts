@@ -16,7 +16,7 @@ export const mock = async (message: Message) => {
   );
 
   if (!toMock) {
-    await message.channel.send(
+    return message.channel.send(
       deepApology(
         `I couldn't quite ascertain to correct casing for mocking this.`
       )

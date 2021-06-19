@@ -3,6 +3,7 @@ import { startClient } from "./discord-client/startClient";
 
 const handleTopLevelApplicationError = (e: Error) => {
   console.error(`Encountered an unrecoverable error`, e);
+  process.exit(1);
 };
 
 const main = async () => {
