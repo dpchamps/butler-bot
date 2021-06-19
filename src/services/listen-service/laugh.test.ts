@@ -26,7 +26,7 @@ const getMessageMock = (reference?: string, messageID?: string) => ({
 } as unknown as MockedObject<Message>);
 
 describe("laugh", () => {
-    afterEach(jest.resetAllMocks);
+    afterEach(jest.clearAllMocks);
 
     it("Should laugh at a user with a funny image", async () => {
         const fakeMessage = getMessageMock("abracadabra", "alakazam");
