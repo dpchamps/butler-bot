@@ -17,7 +17,7 @@ export const laugh = async (message: Message) => {
     );
   }
 
-  try{
+  try {
     const [toLaughAt, girlsLaughingImage] = await Promise.all([
       message.channel.messages.fetch(message.reference.messageID),
       getImageOfGirlsLaughing(),
@@ -27,12 +27,9 @@ export const laugh = async (message: Message) => {
       content: `${toLaughAt.author}, They're laughing at you.`,
       files: [girlsLaughingImage],
     });
-
   } catch {
-
     return message.channel.send(
-        deepApology(`Something went wrong while I started laughing.`)
+      deepApology(`Something went wrong while I started laughing.`)
     );
-
   }
 };
