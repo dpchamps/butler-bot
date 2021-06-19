@@ -7,11 +7,6 @@ const PRELUDE = [
   `At once`,
 ];
 
-// const OUTRO = [
-//     `Forever and always at your service`,
-//     `Charmed`,
-// ];
-
 export const speak = (message: string) =>
   multiline(`${getRandom(PRELUDE)}...`, message);
 
