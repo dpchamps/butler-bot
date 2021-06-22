@@ -9,6 +9,7 @@ import { qrd } from "./qrd";
 import { laugh } from "./laugh";
 import { search } from "./search";
 import { sermon } from "./sermon";
+import { encourage } from "./encourage";
 
 const maybeDoCommand = async (message: Message, config: AppConfig) => {
   const command = parseCommand(message.content);
@@ -58,6 +59,12 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
       await sermon(message);
       break;
     }
+
+    case "encourage": {
+      await encourage(message);
+      break;
+    }
+
     default:
       unreachable(command.type);
   }
