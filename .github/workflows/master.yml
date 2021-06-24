@@ -74,7 +74,10 @@ jobs:
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           name: gatekeeper
-          known_hosts: ${{ secrets.SSH_HOST }}
+          known_hosts: "placeholder"
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy Newest Butler Bot
         shell: bash
