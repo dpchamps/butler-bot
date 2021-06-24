@@ -84,6 +84,6 @@ jobs:
           scp .production.env gatekeeper@${{ secrets.SSH_HOST }}:/home/gatekeeper
           ssh gatekeeper@${{ secrets.SSH_HOST }}
           /bin/bash
-          docker ps
+          docker ps -a
           docker kill $(docker ps -a | awk '$2=="dchampz/butler-bot:latest" { print $1 }')
           docker run -e DEBUG=0 --env-file .production.env -d --rm ${{ secrets.DOCKERHUB_USERNAME }}/butler-bot:latest
