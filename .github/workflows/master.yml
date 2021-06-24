@@ -72,7 +72,7 @@ jobs:
       - name: Install SSH key for gatekeeper
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           name: gatekeeper
           known_hosts: ${{ secrets.KNOWN_HOST }}
 
