@@ -68,3 +68,15 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Install SSH key for gatekeeper
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          name: gatekeeper
+          known_hosts: ${{ secrets.KNOWN_HOST }}
+
+      - name: Deploy Newest Butler Bot
+        shell: bash
+        run: |
+          scp .production.env gatekeeper@to_host:/home/gatekeeper
