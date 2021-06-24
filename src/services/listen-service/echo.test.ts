@@ -17,4 +17,29 @@ describe("echo", () => {
       expect.stringMatching('I will now repeat what you asked: "hello. world"')
     );
   });
+
+  it("Should echo referenced things things", async () => {
+    const messageID = "bazingo";
+    const fetchContent = `I said a long
+    multiline this, lololol`;
+    const fakeMessage = {
+      reference: {
+        messageID,
+      },
+      channel: {
+        send: jest.fn(),
+        messages: {
+          fetch: jest.fn(() => Promise.resolve({ content: fetchContent })),
+        },
+      },
+    } as unknown as Message;
+
+    await echo(fakeMessage, { content: ["hello", "world"] } as BotCommand);
+
+    expect(fakeMessage.channel.send).toHaveBeenCalledWith(
+      expect.stringMatching(
+        `I will now repeat what you asked: "${fetchContent}"`
+      )
+    );
+  });
 });
