@@ -81,4 +81,7 @@ jobs:
       - name: Deploy Newest Butler Bot
         shell: bash
         run: |
-          scp -vvv .production.env gatekeeper@${{ secrets.SSH_HOST }}:/home/gatekeeper
+          scp .production.env gatekeeper@${{ secrets.SSH_HOST }}:/home/gatekeeper
+          ssh gatekeeper@gatekeeper@${{ secrets.SSH_HOST }}
+          docker ps
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/butler-bot:latest
