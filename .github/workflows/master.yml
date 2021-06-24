@@ -82,4 +82,4 @@ jobs:
         shell: bash
         run: |
           scp .production.env gatekeeper@${{ secrets.SSH_HOST }}:/home/gatekeeper
-          ssh -v gatekeeper@${{ secrets.SSH_HOST }} 'bash -s cd/deploy-newest.sh'
+          ssh -v gatekeeper@${{ secrets.SSH_HOST }} 'IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/butler-bot:latest bash -s cd/deploy-newest.sh'
