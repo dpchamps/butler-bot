@@ -82,4 +82,4 @@ jobs:
       - name: Deploy Newest Butler Bot
         shell: bash
         run: |
-          scp .production.env gatekeeper@to_host:/home/gatekeeper
+          scp .production.env gatekeeper@${{ secrets.SSH_HOST }}:/home/gatekeeper
