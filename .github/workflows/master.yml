@@ -82,6 +82,6 @@ jobs:
         shell: bash
         run: |
           scp .production.env gatekeeper@${{ secrets.SSH_HOST }}:/home/gatekeeper
-          ssh gatekeeper@gatekeeper@${{ secrets.SSH_HOST }}
+          ssh gatekeeper@${{ secrets.SSH_HOST }}
           docker ps
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/butler-bot:latest
