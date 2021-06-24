@@ -74,7 +74,7 @@ jobs:
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           name: gatekeeper
-          known_hosts: ${{ secrets.KNOWN_HOST }}
+          known_hosts: ${{ secrets.SSH_HOST }}
 
       - name: Deploy Newest Butler Bot
         shell: bash
