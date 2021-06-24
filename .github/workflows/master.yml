@@ -81,5 +81,6 @@ jobs:
       - name: Deploy Newest Butler Bot
         shell: bash
         run: |
-          scp .production.env gatekeeper@${{ secrets.SSH_HOST }}:/home/gatekeeper
-          ssh -v gatekeeper@${{ secrets.SSH_HOST }} 'IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/butler-bot:latest bash -s' << cd/deploy-newest.sh
+          ls -al
+          scp .production.env cd/deploy-newest.sh gatekeeper@${{ secrets.SSH_HOST }}:/home/gatekeeper
+          ssh gatekeeper@${{ secrets.SSH_HOST }} 'IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/butler-bot:latest bash -s ./deploy-newest.sh'
