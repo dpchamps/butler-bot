@@ -1,5 +1,7 @@
 import { getConfig } from "./config";
-import { startClient } from "./discord-client/startClient";
+import { createDiscordClient } from "./discord-client/createDiscordClient";
+import { createDbClient } from "./services/db/create-db-client";
+import { createDbService } from "./services/db/db";
 
 const handleTopLevelApplicationError = (e: Error) => {
   console.error(`Encountered an unrecoverable error`, e);
@@ -8,10 +10,15 @@ const handleTopLevelApplicationError = (e: Error) => {
 
 const main = async () => {
   const config = getConfig();
-  const shutdownClient = await startClient(config);
 
-  process.on("SIGTERM", () => {
+  const dbClient = await createDbClient(config);
+  const dbService = await createDbService(config, dbClient);
+
+  const shutdownClient = await createDiscordClient(config, dbService);
+
+  process.on("SIGTERM", async () => {
     shutdownClient();
+    await dbClient.end();
   });
 };
 

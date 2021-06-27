@@ -16,10 +16,16 @@ const AppConfig = Record({
   DISCORD_CLIENT_ID: String,
   DISCORD_CLIENT_SECRET: String,
   DISCORD_BOT_TOKEN: String,
+
   IMGFLIP_USERNAME: String,
   IMGFLIP_PASSWORD: String,
+
   DEBUG: Boolean,
   DEBUG_CHANNELS: Array(String),
+
+  POSTGRES_DB: String,
+  POSTGRES_USER: String,
+  POSTGRES_PASSWORD: String,
 });
 
 export type AppConfig = ReturnType<typeof getConfig>;
@@ -32,10 +38,16 @@ export const getConfig = () => {
     DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET,
     DISCORD_BOT_TOKEN,
+
     IMGFLIP_USERNAME,
     IMGFLIP_PASSWORD,
+
     DEBUG,
     DEBUG_CHANNELS,
+
+    POSTGRES_DB,
+    POSTGRES_USER,
+    POSTGRES_PASSWORD,
   } = process.env;
 
   return AppConfig.check({
@@ -50,5 +62,8 @@ export const getConfig = () => {
       typeof DEBUG_CHANNELS === "string"
         ? DEBUG_CHANNELS.split(",")
         : undefined,
+    POSTGRES_DB,
+    POSTGRES_USER,
+    POSTGRES_PASSWORD,
   });
 };
