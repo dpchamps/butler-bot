@@ -8,5 +8,5 @@ export const composeClient = async (
   config: AppConfig,
   dbService: DbService
 ) => {
-  listenService(discordClient, config);
+  listenService(discordClient, config, dbService);
 };

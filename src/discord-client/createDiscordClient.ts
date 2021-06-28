@@ -6,7 +6,7 @@ import { createDbService, DbService } from "../services/db/db";
 import { createDbClient } from "../services/db/create-db-client";
 
 const clientReady = (client: Client) =>
-  timeout(() => new Promise<void>((res) => client.on("ready", res)), 1000);
+  timeout(() => new Promise<void>((res) => client.on("ready", res)), 1500);
 
 export const createDiscordClient = async (
   config: AppConfig,

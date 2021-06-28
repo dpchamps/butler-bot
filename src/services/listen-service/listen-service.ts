@@ -10,8 +10,14 @@ import { laugh } from "./laugh";
 import { search } from "./search";
 import { sermon } from "./sermon";
 import { encourage } from "./encourage";
+import { DbService } from "../db/db";
+import { emoji } from "./emoji";
 
-const maybeDoCommand = async (message: Message, config: AppConfig) => {
+const maybeDoCommand = async (
+  message: Message,
+  config: AppConfig,
+  dbService: DbService
+) => {
   const command = parseCommand(message.content);
 
   if (!command.isValid) return;
@@ -65,18 +71,30 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
       break;
     }
 
+    case "emoji": {
+      await emoji(dbService);
+      break;
+    }
+
     default:
       unreachable(command.type);
   }
 };
 
-export const listenService = (client: Client, config: AppConfig) => {
+export const listenService = (
+  client: Client,
+  config: AppConfig,
+  dbService: DbService
+) => {
   client.on("message", async (message) => {
+    // never respond to bots
+    if (message.author.bot) return;
+
     if (config.DEBUG && !config.DEBUG_CHANNELS.includes(message.channel.id))
       return;
 
     try {
-      await maybeDoCommand(message, config);
+      await maybeDoCommand(message, config, dbService);
     } catch (e) {
       console.error(`Something bad happened, and it went unnoticed...`, e);
     }

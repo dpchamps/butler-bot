@@ -10,8 +10,8 @@ export const createDbClient = async ({
     user: POSTGRES_USER,
     password: POSTGRES_PASSWORD,
     database: POSTGRES_DB,
+    port: 5400,
   });
-
   console.info(`Creating Database Client...`);
   await client.connect();
   console.log(`Database client connected`);
