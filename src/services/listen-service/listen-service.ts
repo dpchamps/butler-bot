@@ -72,7 +72,7 @@ const maybeDoCommand = async (
     }
 
     case "emoji": {
-      await emoji(dbService);
+      await emoji(message, dbService);
       break;
     }
 
