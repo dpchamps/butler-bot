@@ -10,6 +10,7 @@ import { laugh } from "./laugh";
 import { search } from "./search";
 import { sermon } from "./sermon";
 import { encourage } from "./encourage";
+import { vibecheck } from "./vibecheck";
 
 const maybeDoCommand = async (message: Message, config: AppConfig) => {
   const command = parseCommand(message.content);
@@ -62,6 +63,11 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
 
     case "encourage": {
       await encourage(message);
+      break;
+    }
+
+    case "vibecheck": {
+      await vibecheck(message, command);
       break;
     }
 
