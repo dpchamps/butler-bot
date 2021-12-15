@@ -63,5 +63,5 @@ export const fetchMessagesByTime = async (
     return [...sorted, ...next];
   }
 
-  return sorted.filter(({ createdTimestamp }) => createdTimestamp < timestamp);
+  return sorted.filter(({ createdTimestamp }) => createdTimestamp > timestamp);
 };

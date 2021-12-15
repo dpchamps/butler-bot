@@ -1,13 +1,10 @@
 import { BotCommand } from "../../bot/parseCommand";
 import { Message } from "discord.js";
-import {
-  fetchMessages,
-  fetchMessagesByTime,
-} from "../../discord-client/fetchMessages";
+import { fetchMessagesByTime } from "../../discord-client/fetchMessages";
 import Sentiment from "sentiment";
 import { subHours } from "date-fns";
-import { speak } from "../../bot/speak";
-import { userInfo } from "os";
+import { deepApology, speak } from "../../bot/speak";
+import { Option, orDefault, parseToNumber } from "../../util";
 
 const sum = (total: number, el: number) => total + el;
 
@@ -61,27 +58,40 @@ const getVibeBreakdown = (
     }, "");
 };
 
-export const vibecheck = async (message: Message, {}: BotCommand) => {
-  const sentiment = new Sentiment();
-  const sentiments = await fetchMessagesByTime(
-    message,
-    subHours(new Date(), 1).getTime()
-  ).then((messages) =>
-    messages.map(({ content, author: { username } }) => ({
-      sentiment: sentiment.analyze(content),
-      username,
-    }))
-  );
+const parseSubCommand = (subcommand: Option<string>) => {
+  try {
+    return parseToNumber(orDefault(subcommand, "1"));
+  } catch (e) {
+    throw new Error(`That's not a number\n${e.message}`);
+  }
+};
 
-  const averageVibes =
-    sentiments.map(({ sentiment }) => sentiment.score).reduce(sum, 0) /
-    sentiments.length;
+export const vibecheck = async (message: Message, { content }: BotCommand) => {
+  try {
+    const sentiment = new Sentiment();
+    const hours = Math.max(1, Math.min(parseSubCommand(content[0]), 24));
+    const sentiments = await fetchMessagesByTime(
+      message,
+      subHours(message.createdTimestamp, hours).getTime()
+    ).then((messages) =>
+      messages.map(({ content, author: { username } }) => ({
+        sentiment: sentiment.analyze(content),
+        username,
+      }))
+    );
 
-  return message.channel.send(
-    speak(
-      `Here's the vibecheck for the last hour: ${getOutputForAverageVibes(
-        roundToTwo(averageVibes)
-      )}.\n\n${getVibeBreakdown(sentiments)}`
-    )
-  );
+    const averageVibes =
+      sentiments.map(({ sentiment }) => sentiment.score).reduce(sum, 0) /
+      sentiments.length;
+
+    return message.channel.send(
+      speak(
+        `Here's the vibecheck for the last ${hours} hours: ${getOutputForAverageVibes(
+          roundToTwo(averageVibes)
+        )}.\n\n${getVibeBreakdown(sentiments)}`
+      )
+    );
+  } catch (e) {
+    await message.channel.send(deepApology(e.message));
+  }
 };
