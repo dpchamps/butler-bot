@@ -87,9 +87,6 @@ const fetchMessages = async (
   if (!message) return [];
   const nextFetch = Math.min(remaining, 100);
   const nextRemaining = remaining - nextFetch;
-  // if(!channel.isText()) {
-  //   throw new Error()
-  // }
 
   const messages = (
     await message.channel.messages.fetch({
