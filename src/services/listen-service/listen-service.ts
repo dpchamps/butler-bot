@@ -11,6 +11,7 @@ import { search } from "./search";
 import { sermon } from "./sermon";
 import { encourage } from "./encourage";
 import { vibecheck } from "./vibecheck";
+import { orderUp } from "./order-up";
 
 const maybeDoCommand = async (message: Message, config: AppConfig) => {
   const command = parseCommand(message.content);
@@ -68,6 +69,11 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
 
     case "vibecheck": {
       await vibecheck(message, command);
+      break;
+    }
+
+    case "order up": {
+      await orderUp(message, command);
       break;
     }
 
