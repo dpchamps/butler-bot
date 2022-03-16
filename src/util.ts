@@ -86,3 +86,6 @@ export const timeout = <T>(fn: () => Promise<T>, ms: number) =>
       throw new Error(`timeout`);
     }),
   ]);
+
+export const textIf = <T>(input: T | undefined, text: string) =>
+  exists(input) ? text : "";
