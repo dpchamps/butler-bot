@@ -27,11 +27,11 @@ const getMessageMock = (reference?: string, messageID?: string) =>
   } as unknown as MockedObject<Message>);
 
 describe("laugh", () => {
-  afterEach(jest.clearAllMocks);
+  beforeEach(jest.clearAllMocks);
 
   it("Should laugh at a user with a funny image", async () => {
     const fakeMessage = getMessageMock("abracadabra", "alakazam");
-
+    debugger;
     (fakeMessage.channel.messages.fetch as jest.Mock).mockResolvedValue({
       author: "Yosemite",
     });

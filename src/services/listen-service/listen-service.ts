@@ -12,11 +12,12 @@ import { sermon } from "./sermon";
 import { encourage } from "./encourage";
 import { vibecheck } from "./vibecheck";
 import { orderUp } from "./order-up";
+import { maybeRespondWithCleanUrl } from "./url-cleaner";
 
 const maybeDoCommand = async (message: Message, config: AppConfig) => {
   const command = parseCommand(message.content);
 
-  if (!command.isValid) return;
+  if (!command.isValid) return false;
 
   switch (command.type) {
     case "echo": {
@@ -80,6 +81,8 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
     default:
       unreachable(command.type);
   }
+
+  return true;
 };
 
 export const listenService = (client: Client, config: AppConfig) => {
@@ -88,7 +91,10 @@ export const listenService = (client: Client, config: AppConfig) => {
       return;
 
     try {
-      await maybeDoCommand(message, config);
+      const didCommand = await maybeDoCommand(message, config);
+      if (!didCommand) {
+        await maybeRespondWithCleanUrl(message, config);
+      }
     } catch (e) {
       console.error(`Something bad happened, and it went unnoticed...`, e);
     }
