@@ -1,10 +1,12 @@
-import { Collection, Message, Channel } from "discord.js";
+import { Collection, Message } from "discord.js";
 import { BotCommand } from "../../bot/parseCommand";
 import { Option, orDefault, parseToNumber } from "../../util";
 import { deepApology, speak } from "../../bot/speak";
 import compareAsc from "date-fns/compareAsc";
+const openai = require('openai');
 
-const { SummarizerManager } = require("node-summarizer");
+openai.apiKey = 'your-openai-api-key';
+
 const USAGE_MESSAGE = `I expected: \`butler: qrd. <number of messages>\``;
 
 const validateValue = (value: number) => {
@@ -13,7 +15,6 @@ const validateValue = (value: number) => {
       `Can only run the qrd between 10 and 200 messages. One would be _wise_ to follow the chat more closely.`
     );
   }
-
   return value;
 };
 
@@ -25,7 +26,7 @@ const parseQrdSubCommand = (subcommand: Option<string>) => {
   }
 };
 
-const normalizeMessagesForCorpus = (messages: Message[]) =>
+const normalizeMessagesForCorpus = (messages: { content: string, attachments: string[] }[]) =>
   messages
     .flatMap(({ content }) =>
       content
@@ -56,34 +57,38 @@ const topContributors = (n: number, histogram: Record<string, number>) =>
 const lineLength = (ll: number) => (str: string) =>
   str.length > ll ? `${str.substring(0, ll)} ...` : str;
 
-const summarizeMessage = async (messages: Message[]) => {
-  const corpus = normalizeMessagesForCorpus(messages);
+const processImages = async (imageUrls: string[]) => {
+  // For simplicity, this function just returns image URLs.
+  // You can enhance it to use an image processing API like Google Vision API if needed.
+  return imageUrls.map(url => `Image URL: ${url}`);
+};
+
+const summarizeMessage = async (messageData: { content: string, attachments: string[] }[]) => {
+  const textCorpus = normalizeMessagesForCorpus(messageData);
+  const imageUrls = messageData.flatMap(msg => msg.attachments);
+
+  const imageDescriptions = await processImages(imageUrls);
+  const combinedContent = `${textCorpus}\n\nImage Descriptions:\n${imageDescriptions.join('\n')}`;
+
+  const response = await openai.Completion.create({
+    engine: 'gpt-4o',
+    prompt: `Summarize the following content:\n\n${combinedContent}`,
+    max_tokens: 300,
+  });
+
+  const trSummary = response.choices[0].text.trim();
+
   const topAuthors = topContributors(
     4,
-    buildAuthorFrequencyHistogram(messages)
+    buildAuthorFrequencyHistogram(messageData)
   );
-
-  const summarizer = new SummarizerManager(corpus, 8);
-
-  const trSummary = await summarizer
-    .getSummaryByRank()
-    .then(({ summary }: any) => summary);
-
-  const normalizedSummary: Array<string> = [
-    ...(new Set(trSummary.split(/[?.!]/gi)) as unknown as string[]),
-  ].filter(Boolean);
 
   return `Top posters: \n${topAuthors
     .map(([author, posts]) => `\`${author}\`, with ${posts} posts`)
-    .join("\n")}\nSummary: \n${normalizedSummary
-    .map((x: string) => `\t - ${lineLength(300)(x)}`)
-    .join("\n")}`;
+    .join('\n')}\nSummary: \n${trSummary}`;
 };
 
-const fetchMessages = async (
-  message: Message | undefined,
-  remaining: number
-): Promise<Message[]> => {
+const fetchMessages = async (message: Message | undefined, remaining: number): Promise<{ content: string, attachments: string[] }[]> => {
   if (!message) return [];
   const nextFetch = Math.min(remaining, 100);
   const nextRemaining = remaining - nextFetch;
@@ -93,23 +98,26 @@ const fetchMessages = async (
       limit: nextFetch,
       before: message.id,
     })
-  ).filter((x) => !x.author.bot && !x.content.startsWith("butler:"));
+  ).filter(x => !x.author.bot && !x.content.startsWith("butler:"));
+
+  const messageData = messages.map(msg => ({
+    content: msg.content,
+    attachments: msg.attachments.map(att => att.url).filter(url => url.endsWith('.jpg') || url.endsWith('.png'))
+  }));
 
   if (nextRemaining > 0) {
-    const next = await fetchMessages(messages.last(), nextRemaining);
-    return [...messages.values(), ...next];
+    const nextMessages = await fetchMessages(messages.last(), nextRemaining);
+    return [...messageData, ...nextMessages];
   }
 
-  return [...messages.values()].sort((a, b) =>
-    compareAsc(a.createdTimestamp, b.createdTimestamp)
-  );
+  return messageData;
 };
 
 export const qrd = async (message: Message, { content }: BotCommand) => {
   try {
     const limit = parseQrdSubCommand(content[0]);
-    const messages = await fetchMessages(message, limit);
-    const summary = await summarizeMessage(messages);
+    const messageData = await fetchMessages(message, limit);
+    const summary = await summarizeMessage(messageData);
 
     await message.channel.send({
       content: speak(
