@@ -70,7 +70,7 @@ const processImages = async (imageUrls: string[]) => {
   return imageUrls.map(url => `Image URL: ${url}`);
 };
 
-const summarizeMessage = async (messageData: { content: string, attachments: string[] }[]) => {
+const summarizeMessage = async (messageData: MessageData[]) => {
   const textCorpus = normalizeMessagesForCorpus(messageData);
   const imageUrls = messageData.flatMap(msg => msg.attachments);
 
