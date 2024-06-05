@@ -109,7 +109,8 @@ const fetchMessages = async (message: Message | undefined, remaining: number): P
 
   const messageData = messages.map(msg => ({
     content: msg.content,
-    attachments: msg.attachments.map(att => att.url).filter(url => url.endsWith('.jpg') || url.endsWith('.png'))
+    attachments: msg.attachments.map(att => att.url).filter(url => url.endsWith('.jpg') || url.endsWith('.png')),
+    author: msg.author
   }));
 
   if (nextRemaining > 0) {
