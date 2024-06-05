@@ -95,7 +95,7 @@ const summarizeMessage = async (messageData: { content: string, attachments: str
     .join('\n')}\nSummary: \n${trSummary}`;
 };
 
-const fetchMessages = async (message: Message | undefined, remaining: number): Promise<{ content: string, attachments: string[] }[]> => {
+const fetchMessages = async (message: Message | undefined, remaining: number): Promise<MessageData[]> => {
   if (!message) return [];
   const nextFetch = Math.min(remaining, 100);
   const nextRemaining = remaining - nextFetch;
