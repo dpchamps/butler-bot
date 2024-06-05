@@ -26,6 +26,13 @@ const parseQrdSubCommand = (subcommand: Option<string>) => {
   }
 };
 
+type MessageData = {
+  content: string,
+  attachments: string[],
+  author: {
+    username: string
+  }
+};
 const normalizeMessagesForCorpus = (messages: { content: string, attachments: string[] }[]) =>
   messages
     .flatMap(({ content }) =>
