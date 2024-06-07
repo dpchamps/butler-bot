@@ -2,7 +2,7 @@ import { Collection, Message } from "discord.js";
 import { BotCommand } from "../../bot/parseCommand";
 import { Option, orDefault, parseToNumber } from "../../util";
 import { deepApology, speak } from "../../bot/speak";
-import compareAsc from "date-fns/compareAsc";
+import OpenAi from "openai";
 
 const USAGE_MESSAGE = `I expected: \`butler: qrd. <number of messages>\``;
 
@@ -70,7 +70,7 @@ const processImages = async (imageUrls: string[]) => {
   return imageUrls.map((url) => `Image URL: ${url}`);
 };
 
-const summarizeMessage = async (messageData: MessageData[]) => {
+const summarizeMessage = async (messageData: MessageData[], openai: OpenAi) => {
   const textCorpus = normalizeMessagesForCorpus(messageData);
   const imageUrls = messageData.flatMap((msg) => msg.attachments);
 
@@ -79,8 +79,8 @@ const summarizeMessage = async (messageData: MessageData[]) => {
     "\n"
   )}`;
 
-  const response = await openai.Completion.create({
-    engine: "gpt-4o",
+  const response = await openai.completions.create({
+    model: "gpt-4o",
     prompt: `Summarize the following content:\n\n${combinedContent}`,
     max_tokens: 300,
   });
@@ -128,11 +128,15 @@ const fetchMessages = async (
   return messageData;
 };
 
-export const qrd = async (message: Message, { content }: BotCommand) => {
+export const qrd = async (
+  message: Message,
+  { content }: BotCommand,
+  { openAi }: { openAi: OpenAi }
+) => {
   try {
     const limit = parseQrdSubCommand(content[0]);
     const messageData = await fetchMessages(message, limit);
-    const summary = await summarizeMessage(messageData);
+    const summary = await summarizeMessage(messageData, openAi);
 
     await message.channel.send({
       content: speak(

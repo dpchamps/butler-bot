@@ -13,8 +13,17 @@ import { encourage } from "./encourage";
 import { vibecheck } from "./vibecheck";
 import { orderUp } from "./order-up";
 import { maybeRespondWithCleanUrl } from "./url-cleaner";
+import OpenAi from "openai";
 
-const maybeDoCommand = async (message: Message, config: AppConfig) => {
+export type ListenServiceModules = {
+  openAi: OpenAi;
+};
+
+const maybeDoCommand = async (
+  message: Message,
+  config: AppConfig,
+  modules: ListenServiceModules
+) => {
   const command = parseCommand(message.content);
 
   if (!command.isValid) return false;
@@ -43,7 +52,7 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
     }
 
     case "qrd": {
-      await qrd(message, command);
+      await qrd(message, command, modules);
       break;
     }
 
@@ -86,12 +95,16 @@ const maybeDoCommand = async (message: Message, config: AppConfig) => {
 };
 
 export const listenService = (client: Client, config: AppConfig) => {
+  const openAi = new OpenAi({
+    apiKey: config.OPEN_AI_KEY,
+  });
+
   client.on("message", async (message) => {
     if (config.DEBUG && !config.DEBUG_CHANNELS.includes(message.channel.id))
       return;
 
     try {
-      const didCommand = await maybeDoCommand(message, config);
+      const didCommand = await maybeDoCommand(message, config, { openAi });
       if (!didCommand) {
         await maybeRespondWithCleanUrl(message, config);
       }
