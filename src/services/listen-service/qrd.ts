@@ -3,9 +3,6 @@ import { BotCommand } from "../../bot/parseCommand";
 import { Option, orDefault, parseToNumber } from "../../util";
 import { deepApology, speak } from "../../bot/speak";
 import compareAsc from "date-fns/compareAsc";
-const openai = require("openai");
-
-openai.apiKey = "your-openai-api-key";
 
 const USAGE_MESSAGE = `I expected: \`butler: qrd. <number of messages>\``;
 
