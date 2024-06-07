@@ -3,9 +3,9 @@ import { BotCommand } from "../../bot/parseCommand";
 import { Option, orDefault, parseToNumber } from "../../util";
 import { deepApology, speak } from "../../bot/speak";
 import compareAsc from "date-fns/compareAsc";
-const openai = require('openai');
+const openai = require("openai");
 
-openai.apiKey = 'your-openai-api-key';
+openai.apiKey = "your-openai-api-key";
 
 const USAGE_MESSAGE = `I expected: \`butler: qrd. <number of messages>\``;
 
@@ -27,13 +27,16 @@ const parseQrdSubCommand = (subcommand: Option<string>) => {
 };
 
 type MessageData = {
-  content: string,
-  attachments: string[],
+  content: string;
+  attachments: string[];
   author: {
-    username: string
-  }
+    username: string;
+  };
 };
-const normalizeMessagesForCorpus = (messages: { content: string, attachments: string[] }[]) =>
+
+const normalizeMessagesForCorpus = (
+  messages: { content: string; attachments: string[] }[]
+) =>
   messages
     .flatMap(({ content }) =>
       content
@@ -67,18 +70,20 @@ const lineLength = (ll: number) => (str: string) =>
 const processImages = async (imageUrls: string[]) => {
   // For simplicity, this function just returns image URLs.
   // You can enhance it to use an image processing API like Google Vision API if needed.
-  return imageUrls.map(url => `Image URL: ${url}`);
+  return imageUrls.map((url) => `Image URL: ${url}`);
 };
 
 const summarizeMessage = async (messageData: MessageData[]) => {
   const textCorpus = normalizeMessagesForCorpus(messageData);
-  const imageUrls = messageData.flatMap(msg => msg.attachments);
+  const imageUrls = messageData.flatMap((msg) => msg.attachments);
 
   const imageDescriptions = await processImages(imageUrls);
-  const combinedContent = `${textCorpus}\n\nImage Descriptions:\n${imageDescriptions.join('\n')}`;
+  const combinedContent = `${textCorpus}\n\nImage Descriptions:\n${imageDescriptions.join(
+    "\n"
+  )}`;
 
   const response = await openai.Completion.create({
-    engine: 'gpt-4o',
+    engine: "gpt-4o",
     prompt: `Summarize the following content:\n\n${combinedContent}`,
     max_tokens: 300,
   });
@@ -92,10 +97,13 @@ const summarizeMessage = async (messageData: MessageData[]) => {
 
   return `Top posters: \n${topAuthors
     .map(([author, posts]) => `\`${author}\`, with ${posts} posts`)
-    .join('\n')}\nSummary: \n${trSummary}`;
+    .join("\n")}\nSummary: \n${trSummary}`;
 };
 
-const fetchMessages = async (message: Message | undefined, remaining: number): Promise<MessageData[]> => {
+const fetchMessages = async (
+  message: Message | undefined,
+  remaining: number
+): Promise<MessageData[]> => {
   if (!message) return [];
   const nextFetch = Math.min(remaining, 100);
   const nextRemaining = remaining - nextFetch;
@@ -105,12 +113,14 @@ const fetchMessages = async (message: Message | undefined, remaining: number): P
       limit: nextFetch,
       before: message.id,
     })
-  ).filter(x => !x.author.bot && !x.content.startsWith("butler:"));
+  ).filter((x) => !x.author.bot && !x.content.startsWith("butler:"));
 
-  const messageData = messages.map(msg => ({
+  const messageData = messages.map((msg) => ({
     content: msg.content,
-    attachments: msg.attachments.map(att => att.url).filter(url => url.endsWith('.jpg') || url.endsWith('.png')),
-    author: msg.author
+    attachments: msg.attachments
+      .map((att) => att.url)
+      .filter((url) => url.endsWith(".jpg") || url.endsWith(".png")),
+    author: msg.author,
   }));
 
   if (nextRemaining > 0) {
