@@ -48,7 +48,7 @@ const normalizeMessagesForCorpus = (
     .map((x) => (!x.match(/([?.!])$/) ? `${x}.` : x))
     .join("\n");
 
-const buildAuthorFrequencyHistogram = (messages: Message[]) =>
+const buildAuthorFrequencyHistogram = (messages: MessageData[]) =>
   messages.reduce(
     (histogram, message) => ({
       ...histogram,
