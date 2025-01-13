@@ -3,7 +3,9 @@ import { Message } from "discord.js";
 import { AppConfig } from "../../config";
 import extractUrls from "extract-urls";
 import { speak } from "../../bot/speak";
-import { IRule } from "tidy-url/lib/interface";
+import { IData, IRule } from "tidy-url/lib/interface";
+import { exists } from "../../util";
+import fetch from "node-fetch";
 
 TidyURL.rules.push({
   name: "buyatoyota.com",
@@ -77,6 +79,56 @@ TidyURL.rules.push({
   rev: false,
 } as unknown as IRule);
 
+type CleanResult =
+  | {
+      type: "tidy";
+      data: IData;
+    }
+  | {
+      type: "degoogle";
+      data?: string;
+    };
+
+const extractRedirect = async (url: string) => {
+  try {
+    const response = await fetch(url, {
+      redirect: "manual",
+      headers: {
+        "user-agent": "fuck-off/google",
+      },
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      return response.headers.get("location") ?? undefined;
+    } else {
+      return undefined; // No redirect
+    }
+  } catch (error) {
+    console.error("Error while retrieving url:", error);
+    return undefined;
+  }
+};
+
+const cleanUrl = async (url: string): Promise<CleanResult> => {
+  if (url.includes("search.app")) {
+    return {
+      type: "degoogle",
+      data: await extractRedirect(url),
+    };
+  }
+  return { type: "tidy", data: TidyURL.clean(url) };
+};
+
+const filterCleanResult = (input: CleanResult) => {
+  if (input.type === "tidy") return input.data.info.reduction > 0;
+  return typeof input.data !== "undefined";
+};
+
+const urlFromCleanResult = (input: CleanResult) => {
+  if (input.type == "tidy") return input.data.url;
+  return input.data;
+};
+
 export const maybeRespondWithCleanUrl = async (
   message: Message,
   config: AppConfig
@@ -85,11 +137,12 @@ export const maybeRespondWithCleanUrl = async (
 
   if (!urls || !urls.length || message.author.bot) return;
 
-  const sanitizedUrls = urls
-    .filter((url) => TidyURL.validate(url))
-    .map((url) => TidyURL.clean(url))
-    .filter((data) => data.info.reduction > 0)
-    .map(({ url }) => url);
+  const sanitizedUrls = (
+    await Promise.all(urls.filter((url) => TidyURL.validate(url)).map(cleanUrl))
+  )
+    .filter(filterCleanResult)
+    .map(urlFromCleanResult)
+    .filter(exists);
 
   if (!sanitizedUrls.length) return;
 
