@@ -20,6 +20,7 @@ const AppConfig = Record({
   IMGFLIP_PASSWORD: String,
   DEBUG: Boolean,
   DEBUG_CHANNELS: Array(String),
+  OPEN_AI_KEY: String,
 });
 
 export type AppConfig = ReturnType<typeof getConfig>;
@@ -36,6 +37,7 @@ export const getConfig = () => {
     IMGFLIP_PASSWORD,
     DEBUG,
     DEBUG_CHANNELS,
+    OPEN_AI_KEY,
   } = process.env;
 
   return AppConfig.check({
@@ -45,6 +47,7 @@ export const getConfig = () => {
     DISCORD_BOT_TOKEN,
     IMGFLIP_USERNAME,
     IMGFLIP_PASSWORD,
+    OPEN_AI_KEY,
     DEBUG: DEBUG === "1",
     DEBUG_CHANNELS:
       typeof DEBUG_CHANNELS === "string"
